@@ -557,14 +557,19 @@
             stopPolling();
             loadingSpinner.style.display = "none";
             
-            codeDisplay.innerHTML = `<div class="success-message" style="flex-direction: column; gap: 8px;">
-              <div style="color: var(--primary-color); font-size: 18px;"><i class="fas fa-check-circle"></i> Connected Successfully!</div>
-              <div style="font-size: 11px; color: var(--text-secondary); word-break: break-all; margin-top: 5px; font-family: monospace; max-height: 80px; overflow-y: auto; padding: 5px; background: rgba(0,0,0,0.2); border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">${data.sessionID}</div>
+            codeDisplay.innerHTML = `<div class="success-message" style="flex-direction: column; gap: 12px; padding: 8px 0;">
+              <div style="color: var(--primary-color); font-size: 22px;"><i class="fas fa-check-circle"></i></div>
+              <div style="font-size: 16px; font-weight: 700; color: var(--primary-color);">Connected Successfully!</div>
+              <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; text-align: center;">
+                ✅ Your Session ID has been sent to your WhatsApp.<br>
+                Open WhatsApp, <strong style="color: var(--text-primary);">copy the long message</strong> you received,<br>
+                then paste it in your <strong style="color: var(--text-primary);">OxBot Dashboard → Add Bot</strong>.
+              </div>
             </div>`;
             codeDisplay.style.display = 'flex';
             qrDisplay.style.display = 'none';
             
-            // Set session ID globally and update copy button text
+            // Store session and update copy button
             window.latestSessionID = data.sessionID;
             copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy Session ID';
             copyBtn.style.display = 'flex';
