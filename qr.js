@@ -129,6 +129,10 @@ async function initiateSession(sessionId, dirs, sessionStoreEntry) {
                     const userJid = sock.user?.id ? jidNormalizedUser(sock.user.id) : null;
                         
                     if (userJid) {
+                        // Wait for saveCreds() to flush the full creds (including 'me' field) to disk
+                        // before reading — without this delay, creds.json may be missing 'me',
+                        // causing the dashboard to reject it with "Session incomplete".
+                        await delay(3000);
                         const sessionContent = fs.readFileSync(dirs + '/creds.json', 'utf8');
                         const b64 = Buffer.from(sessionContent).toString('base64');
                         const waNumber = userJid.split('@')[0].split(':')[0];
