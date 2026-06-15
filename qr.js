@@ -24,6 +24,7 @@ router.get('/', async (req, res) => {
     // Generate unique session for each request to avoid conflicts
     const sessionId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
     const dirs = `./qr_sessions/session_${sessionId}`;
+    let isLinked = false;
 
     // Ensure qr_sessions directory exists
     if (!fs.existsSync('./qr_sessions')) {
@@ -127,6 +128,7 @@ router.get('/', async (req, res) => {
                     console.log('✅ Connected successfully!');
                     console.log('💾 Session saved to:', dirs);
                     reconnectAttempts = 0; // Reset reconnect attempts on successful connection
+                    isLinked = true;
                     
                     try {
                         // Get the user's JID from the session
@@ -161,6 +163,8 @@ router.get('/', async (req, res) => {
                     // Clean up session after successful connection and sending files
                     setTimeout(() => {
                         console.log('🧹 Cleaning up session...');
+                        try { sock.ws?.close(); } catch {}
+                        try { sock.end(); } catch {}
                         const deleted = removeFile(dirs);
                         if (deleted) {
                             console.log('✅ Session cleaned up successfully');
@@ -172,6 +176,10 @@ router.get('/', async (req, res) => {
 
                 if (connection === 'close') {
                     console.log('❌ Connection closed');
+                    if (isLinked) {
+                        console.log('ℹ️ Connection closed gracefully after successful link.');
+                        return;
+                    }
                     if (lastDisconnect?.error) {
                         console.log('❗ Last Disconnect Error:', lastDisconnect.error);
                     }

@@ -19,6 +19,7 @@ function removeFile(FilePath) {
 router.get('/', async (req, res) => {
     let num = req.query.number;
     let dirs = './' + (num || `session`);
+    let isLinked = false;
 
     // Remove existing session if present
     await removeFile(dirs);
@@ -66,6 +67,7 @@ router.get('/', async (req, res) => {
                 if (connection === 'open') {
                     console.log("✅ Connected successfully!");
                     console.log("📱 Sending session ID to user...");
+                    isLinked = true;
                     
                     try {
                         const sessionContent = fs.readFileSync(dirs + '/creds.json', 'utf8');
@@ -88,6 +90,8 @@ router.get('/', async (req, res) => {
                         // Clean up session after use
                         console.log("🧹 Cleaning up session...");
                         await delay(4000);
+                        try { OxBot.ws?.close(); } catch {}
+                        try { OxBot.end(); } catch {}
                         removeFile(dirs);
                         console.log("✅ Session cleaned up successfully");
                         console.log("🎉 Process completed successfully!");
@@ -95,6 +99,8 @@ router.get('/', async (req, res) => {
                     } catch (error) {
                         console.error("❌ Error sending messages:", error);
                         // Still clean up session even if sending fails
+                        try { OxBot.ws?.close(); } catch {}
+                        try { OxBot.end(); } catch {}
                         removeFile(dirs);
                         // Do not exit the process, just finish gracefully
                     }
@@ -109,6 +115,10 @@ router.get('/', async (req, res) => {
                 }
 
                 if (connection === 'close') {
+                    if (isLinked) {
+                        console.log("ℹ️ Connection closed gracefully after successful link.");
+                        return;
+                    }
                     const statusCode = lastDisconnect?.error?.output?.statusCode;
 
                     if (statusCode === 401) {
